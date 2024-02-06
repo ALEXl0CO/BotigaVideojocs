@@ -16,6 +16,14 @@ public class BotigaVideojocs {
     public static Random random;
     public static Scanner teclado;
     
+    private static final int OPCION_CONSULTAR_CATALOGO = 1;
+    private static final int OPCION_STOCK = 2;
+    private static final int OPCION_CONSULTAR_CATALOGO_ORDENADO_STOCK = 3;
+    private static final int OPCION_CONSULTAR_CATALOGO_ORDENADO_PRECIO = 4;
+    private static final int OPCION_REGISTRAR_VENTA = 5;
+    private static final int OPCION_REGISTRAR_DEVOLUCION = 6;
+    private static final int OPCION_SALIR = 7;
+    
     private static final int MIN_MENU = 1;
     private static final int MAX_MENU = 7;
     
@@ -39,21 +47,15 @@ public class BotigaVideojocs {
             {"8", "Minecraft", "19.99"},
             {"9", "The Sims", "34.99"},
             {"10", "Grand Theft Auto V", "49.99"}
-        };
+        }; // Tabla con todos los videojuegos y sus precios
         
         int stockVideojocs[][] = stockVideojocs(juegos, MIN_STOCK, MAX_STOCK);
         
-        visualizarSopa(stockVideojocs);
-        
-        
-        
-        
-        
-        
+        mostrarMenu(MIN_MENU, MAX_MENU);
     }
     
     
-    ////////////////////////////// .Método que interactuan con la sopa de letras. //////////////////////////////
+    ////////////////////////////// .Métodos de prueba. //////////////////////////////
     public static void visualizarSopa(int[][] sopaLetras) {
 
         System.out.println("");
@@ -71,34 +73,112 @@ public class BotigaVideojocs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    ////////////////////////////// .Métodos menú. //////////////////////////////
-    public static void mostrarMenu() {
-        
+    ////////////////////////////// .Pedir entero usuario. //////////////////////////////
+    /////////////////
+    // Este método recibe 3 parámetros. El primero es el mensaje que se quiere
+    //  mostrar por pantalla. El segundo el número mínimo deseado. El tercero
+    //  el número máximo deseado. En resumen, el rango.
+    public static int obtenerEnteroUsuario(String mensaje, int min, int max) {
+
+        do {
+            int numUser = obtenerEnteroUsuario(mensaje);
+
+            if (numUser >= min && numUser <= max) {
+                return numUser;
+            } else {
+                System.out.println("Introduce una opción válida\n");
+            }
+        } while (true);
     }
+    /////////////////
+    // Este método es llamado por el anterior, el cual imprime por pantalla
+    //  el mensaje pasado por parámetro en el método anterior y comprueba
+    //  el valor introducido por el usuario. En caso de no ser Int, devuelve
+    //  un mensaje de error, repitiendo el ciclo hasta que sea válido.
+    public static int obtenerEnteroUsuario(String mensaje) {
+        do {
+            System.out.print(mensaje);
+            if (teclado.hasNextInt()) {
+                return teclado.nextInt();
+            }
+            System.out.println("Error! Tipo Incorrecto\n");
+            teclado.next();
+        } while (true);
+    }
+    ////////////////////////////////////////////////////////////////////////////////////
     
     
+    ////////////////////////////// .Funciones que utilizan los métodos. //////////////////////////////
+    // Este método genera un número aleatorio entre el número máximo y mínimo que se le pase como
+    //  parámetro.
+    public static int generarRandom(int min, int max) {
+        return random.nextInt(min, max + 1);
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////////
     
-    ////////////////////////////////////////////////////////////////////////////
+    
+    ////////////////////////////// .Método stock videojuegos. //////////////////////////////
+    // Este método genera un array bidimensional, en la primera columna guarda el ID y en
+    //  la segunda columna almacena el stock de dicho videojuego generado aleatoriamente
+    //  entre el rango 0-20.
     public static int[][] stockVideojocs(String[][] matriz, int min, int max) {
-        
+
         int stock[][] = new int[matriz.length][2];
-        
+
         for (int y = 0; y < stock.length; y++) {
-            
+
             for (int x = 0; x < stock[y].length; x++) {
-                
+
                 if (x == 0) {
-                    stock[y][x] = y;
+                    stock[y][x] = (y + 1); //Esto permite que los IDs del stock coincidan con los IDs del catálogo de juegos.
                 } else {
                     stock[y][x] = generarRandom(min, max);
                 }
             }
         }
-        
+
         return stock;
     }
+    ////////////////////////////////////////////////////////////////////////////////////////
     
-    public static int generarRandom(int min, int max) {
-        return random.nextInt(min, max + 1);
+    
+    ////////////////////////////// .Métodos menú. //////////////////////////////
+    // Este método es el general que muestra cada opción del menú y a su vez
+    //  dentro de este se llaman a los demás métodos.
+    public static void mostrarMenu(int min, int max) {
+        
+        boolean salir = false;
+        
+        do {
+            System.out.println("Bienvenido a la tienda de videojuegos. Elija una opción:");
+            System.out.printf("   %d. Consultar catálogo de videojuegos\n", OPCION_CONSULTAR_CATALOGO);
+            System.out.printf("   %d. Consultar stock de videojuegos\n", OPCION_STOCK);
+            System.out.printf("   %d. Mostrar catálogo ordenado por stock\n", OPCION_CONSULTAR_CATALOGO_ORDENADO_STOCK);
+            System.out.printf("   %d. Mostrar catálogo ordenado por precio\n", OPCION_CONSULTAR_CATALOGO_ORDENADO_PRECIO);
+            System.out.printf("   %d. Registrar venta de videojuegos\n", OPCION_REGISTRAR_VENTA);
+            System.out.printf("   %d. Registrar devolución de videojuegos\n", OPCION_REGISTRAR_DEVOLUCION);
+            System.out.printf("   %d. Salir de la aplicación", OPCION_SALIR);
+            System.out.println("\n");
+            
+            int enteroUsuario = obtenerEnteroUsuario("Introduce opción: ", min, max);
+            
+            switch (enteroUsuario) {
+                case OPCION_CONSULTAR_CATALOGO -> {
+                }
+                case OPCION_STOCK -> {
+                }
+                case OPCION_CONSULTAR_CATALOGO_ORDENADO_STOCK -> {
+                }
+                case OPCION_CONSULTAR_CATALOGO_ORDENADO_PRECIO -> {
+                }
+                case OPCION_REGISTRAR_VENTA -> {
+                }
+                case OPCION_REGISTRAR_DEVOLUCION -> {
+                }
+                case OPCION_SALIR -> salir = true;
+            }
+        } while (!salir);
+        
     }
+    ////////////////////////////////////////////////////////////////////////////
 }
