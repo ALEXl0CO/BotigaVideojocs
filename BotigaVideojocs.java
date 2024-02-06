@@ -4,6 +4,7 @@
  */
 package acts_entregables;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -35,21 +36,6 @@ public class BotigaVideojocs {
         
         random = new Random();
         teclado = new Scanner(System.in);
-        
-        String[][] juegos = {
-            {"1", "Super Mario Bros", "19.99"},
-            {"2", "The Legend of Zelda", "24.99"},
-            {"3", "Sonic the Hedgehog", "14.99"},
-            {"4", "Tetris", "9.99"},
-            {"5", "Pac-Man", "4.99"},
-            {"6", "Street Fighter II", "29.99"},
-            {"7", "Doom", "39.99"},
-            {"8", "Minecraft", "19.99"},
-            {"9", "The Sims", "34.99"},
-            {"10", "Grand Theft Auto V", "49.99"}
-        }; // Tabla con todos los videojuegos y sus precios
-        
-        int stockVideojocs[][] = stockVideojocs(juegos, MIN_STOCK, MAX_STOCK);
         
         mostrarMenu(MIN_MENU, MAX_MENU);
     }
@@ -121,18 +107,15 @@ public class BotigaVideojocs {
     // Este método genera un array bidimensional, en la primera columna guarda el ID y en
     //  la segunda columna almacena el stock de dicho videojuego generado aleatoriamente
     //  entre el rango 0-20.
-    public static int[][] stockVideojocs(String[][] matriz, int min, int max) {
-
-        int stock[][] = new int[matriz.length][2];
+    public static String[][] stockVideojocs(String[][] matriz, int min, int max) {
+        String stock[][] = new String[matriz.length][2];
 
         for (int y = 0; y < stock.length; y++) {
-
             for (int x = 0; x < stock[y].length; x++) {
-
                 if (x == 0) {
-                    stock[y][x] = (y + 1); //Esto permite que los IDs del stock coincidan con los IDs del catálogo de juegos.
+                    stock[y][x] = String.valueOf(y + 1); // Esto permite que los IDs del stock coincidan con los IDs del catálogo de juegos.
                 } else {
-                    stock[y][x] = generarRandom(min, max);
+                    stock[y][x] = String.valueOf(generarRandom(min, max));
                 }
             }
         }
@@ -146,6 +129,21 @@ public class BotigaVideojocs {
     // Este método es el general que muestra cada opción del menú y a su vez
     //  dentro de este se llaman a los demás métodos.
     public static void mostrarMenu(int min, int max) {
+        
+        String[][] juegos = {
+            {"1", "Super Mario Bros", "19.99"},
+            {"2", "The Legend of Zelda", "24.99"},
+            {"3", "Sonic the Hedgehog", "14.99"},
+            {"4", "Tetris", "9.99"},
+            {"5", "Pac-Man", "4.99"},
+            {"6", "Street Fighter II", "29.99"},
+            {"7", "Doom", "39.99"},
+            {"8", "Minecraft", "19.99"},
+            {"9", "The Sims", "34.99"},
+            {"10", "Grand Theft Auto V", "49.99"}
+        }; // Tabla con todos los videojuegos y sus precios
+
+        String stockVideojocs[][] = stockVideojocs(juegos, MIN_STOCK, MAX_STOCK);
         
         boolean salir = false;
         
@@ -163,11 +161,11 @@ public class BotigaVideojocs {
             int enteroUsuario = obtenerEnteroUsuario("Introduce opción: ", min, max);
             
             switch (enteroUsuario) {
-                case OPCION_CONSULTAR_CATALOGO -> {
-                }
-                case OPCION_STOCK -> {
-                }
+                case OPCION_CONSULTAR_CATALOGO -> mostrarCatalogoVideojuegos(1, juegos, 2, juegos, 3, juegos, "Código", "Nombre", "Precio");
+                case OPCION_STOCK -> mostrarCatalogoVideojuegos(1, juegos, 2, juegos, 2, stockVideojocs, "Código", "Nombre", "Stock");
                 case OPCION_CONSULTAR_CATALOGO_ORDENADO_STOCK -> {
+                    String catalogoOrdenadoStock[][] = catalogoOrdenadoStock(stockVideojocs, 2);
+                    mostrarCatalogoVideojuegos(1, catalogoOrdenadoStock, 2, catalogoOrdenadoStock, 2, catalogoOrdenadoStock, "ID", "Ordenado", "Nada");
                 }
                 case OPCION_CONSULTAR_CATALOGO_ORDENADO_PRECIO -> {
                 }
@@ -181,4 +179,79 @@ public class BotigaVideojocs {
         
     }
     ////////////////////////////////////////////////////////////////////////////
+    
+    
+    ////////////////////////////// .Método para imprimir cada tabla. //////////////////////////////
+    // Este imprime cada columna y cabecera especificadas por los parámetros que recibe.
+    public static void mostrarCatalogoVideojuegos(int columnaUno, String[][] arrayBidimensionalUno, 
+                                                  int columnaDos, String[][] arrayBidimensionalDos, 
+                                                  int columnaTres, String[][] arrayBidimensionalTres, 
+                                                  String cabUno, String cabDos, String cabTres) {
+        
+        // Arrays que almacenan el tamaño máximo de cada columna para luego imprimir los espacios adecuados para que cuadre todo.
+        int espaciosColumnaUno = espaciosColumna(arrayBidimensionalUno, columnaUno);
+        int espaciosColumnaDos = espaciosColumna(arrayBidimensionalDos, columnaDos);
+        int espaciosColumnaTres = espaciosColumna(arrayBidimensionalTres, columnaTres);
+        
+        // Esto comprueba si la longitud de la cabezera es superior a la longitud máxima de las columnas para que siempre quepa todo.
+        if (cabUno.length() > espaciosColumnaUno) {
+            espaciosColumnaUno = cabUno.length();
+        }
+        if (cabDos.length() > espaciosColumnaDos) {
+            espaciosColumnaDos = cabDos.length();
+        }
+        if (cabTres.length() > espaciosColumnaTres) {
+            espaciosColumnaTres = cabTres.length();
+        }
+        
+        System.out.println(""); // Espacio en blanco para que se vea una separación antes de mostrar la tabla
+        
+        mostrarLineaSeparadora(espaciosColumnaUno, espaciosColumnaDos, espaciosColumnaTres); // Este método genera guiones según la cantidad de espacios para cada columna.
+        System.out.printf("| %-" + espaciosColumnaUno + "s | %-" + espaciosColumnaDos + "s | %-" + espaciosColumnaTres + "s |\n", cabUno, cabDos, cabTres); // Esto hace lo mismo que la siguiente explicacioón.
+        mostrarLineaSeparadora(espaciosColumnaUno, espaciosColumnaDos, espaciosColumnaTres);
+
+        // Aquí se muestra todo el contenido de cada columna fila a fila. Los espacios se calculan mediante `%-Xs`. Como X la conocemos previamente
+        //  con los cálculos previos a los espacios, se concatena el `%-` con la variable de espacios y luego la `s` ya que lo estamos imprimiendo como String.
+        for (int i = 0; i < arrayBidimensionalUno.length; i++) {
+            System.out.printf("| %-" + espaciosColumnaUno + "s | %-" + espaciosColumnaDos + "s | %-" + espaciosColumnaTres + "s |\n",
+                    arrayBidimensionalUno[i][columnaUno - 1], arrayBidimensionalDos[i][columnaDos - 1], arrayBidimensionalTres[i][columnaTres - 1]);
+        }
+        
+        mostrarLineaSeparadora(espaciosColumnaUno, espaciosColumnaDos, espaciosColumnaTres);
+        
+        System.out.println(""); // Espacio en blanco para que se vea una separación después de mostrar la tabla
+    }
+    
+    // Este método recorre todos los datos de la columna y comprueba cuál es el que mayor longitud tiene. Devuelve el resultado más grande.
+    public static int espaciosColumna(String[][] juegos, int columna) {
+        
+        int tamanyoMax = 0;
+        
+        for (int y = 0; y < juegos.length; y++) {
+
+            if (juegos[y][columna - 1].length() > tamanyoMax) {
+                tamanyoMax = juegos[y][columna - 1].length();
+            }
+        }
+        
+        return tamanyoMax;
+    }
+    
+    // Este método imprime los mases: `+`. Al lado de cada `+` hay un `%s`, este tiene como valor que se repita el guión `-` tantas veces
+    //  como el espacio máximo de cada columna más dos huecos más debido al espacio en blanco antes y después cada texto de la cabecera.
+    public static void mostrarLineaSeparadora(int anchoColumnaUno, int anchoColumnaDos, int anchoColumnaTres) {
+        System.out.printf("+%s+%s+%s+\n", "-".repeat(anchoColumnaUno + 2), "-".repeat(anchoColumnaDos + 2), "-".repeat(anchoColumnaTres + 2));
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    ////////////////////////////// .Método para imprimir cada tabla. //////////////////////////////
+    public static String[][] catalogoOrdenadoStock(String [][] stock, int columna) {
+        
+        String[][] stockCopia = Arrays.copyOf(stock, stock.length);
+
+        Arrays.sort(stockCopia, (a, b) -> a[columna - 1].compareTo(b[columna - 1]));
+
+        return stockCopia;
+    }
 }
