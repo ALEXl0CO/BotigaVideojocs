@@ -31,6 +31,9 @@ public class BotigaVideojocs {
     private static final int MIN_STOCK = 0;
     private static final int MAX_STOCK = 20;
     
+    private static final String ORDENAR_STOCK = "menor"; // Si pones menor, ordena de menor a mayor la columna del stock
+    private static final String ORDENAR_PRECIO = "mayor"; // Si pones mayor, ordena de mayor a menor la columna del stock
+    
     
     public static void main(String[] args) {
         
@@ -41,26 +44,7 @@ public class BotigaVideojocs {
     }
     
     
-    ////////////////////////////// .Métodos de prueba. //////////////////////////////
-    public static void visualizarSopa(int[][] sopaLetras) {
-
-        System.out.println("");
-
-        for (int[] fila : sopaLetras) {
-
-            for (int columna : fila) {
-
-                System.out.print(columna + " ");
-            }
-
-            System.out.println();
-        }
-    }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    
     ////////////////////////////// .Pedir entero usuario. //////////////////////////////
-    /////////////////
     // Este método recibe 3 parámetros. El primero es el mensaje que se quiere
     //  mostrar por pantalla. El segundo el número mínimo deseado. El tercero
     //  el número máximo deseado. En resumen, el rango.
@@ -76,7 +60,7 @@ public class BotigaVideojocs {
             }
         } while (true);
     }
-    /////////////////
+    
     // Este método es llamado por el anterior, el cual imprime por pantalla
     //  el mensaje pasado por parámetro en el método anterior y comprueba
     //  el valor introducido por el usuario. En caso de no ser Int, devuelve
@@ -164,10 +148,12 @@ public class BotigaVideojocs {
                 case OPCION_CONSULTAR_CATALOGO -> mostrarCatalogoVideojuegos(1, juegos, 2, juegos, 3, juegos, "Código", "Nombre", "Precio");
                 case OPCION_STOCK -> mostrarCatalogoVideojuegos(1, juegos, 2, juegos, 2, stockVideojocs, "Código", "Nombre", "Stock");
                 case OPCION_CONSULTAR_CATALOGO_ORDENADO_STOCK -> {
-                    String catalogoOrdenadoStock[][] = catalogoOrdenadoStock(stockVideojocs, 2);
-                    mostrarCatalogoVideojuegos(1, catalogoOrdenadoStock, 2, catalogoOrdenadoStock, 2, catalogoOrdenadoStock, "ID", "Ordenado", "Nada");
+                    String ordenadoPorStock[][] = catalogoOrdenadoStock(juegos, stockVideojocs, 3, ORDENAR_STOCK);
+                    mostrarCatalogoVideojuegos(1, ordenadoPorStock, 2, ordenadoPorStock, 3, ordenadoPorStock, "Código", "Nombre", "Stock");
                 }
                 case OPCION_CONSULTAR_CATALOGO_ORDENADO_PRECIO -> {
+                    String ordenadoPorPrecio[][] = catalogoOrdenadoStock(juegos, 3, ORDENAR_PRECIO);
+                    mostrarCatalogoVideojuegos(1, ordenadoPorPrecio, 2, ordenadoPorPrecio, 3, ordenadoPorPrecio, "Código", "Nombre", "Precio");
                 }
                 case OPCION_REGISTRAR_VENTA -> {
                 }
@@ -177,6 +163,7 @@ public class BotigaVideojocs {
             }
         } while (!salir);
         
+        System.out.println("Adiós");
     }
     ////////////////////////////////////////////////////////////////////////////
     
@@ -245,13 +232,144 @@ public class BotigaVideojocs {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    ////////////////////////////// .Método para imprimir cada tabla. //////////////////////////////
-    public static String[][] catalogoOrdenadoStock(String [][] stock, int columna) {
+    ////////////////////////////// .Métodos para ordenar. //////////////////////////////
+    // Este método junto con el de abajo tienen el nombre igual pero realizan distintas
+    //  opciones. Este recibe como parámetro el catálogo completo de videojuegis,
+    //  el stock de cada videojuego, la columna a ordenar (será la de stock) y
+    //  cómo se quiere ordenar la columna (de mayor a menor o al revés).
+    public static String[][] catalogoOrdenadoStock(String[][] videojuegos, String[][] stock, int columna, String tipo) {
+
+        String[][] stockOrdenado = catalogoOrdenadoStock(stock, 2, tipo); // Esta línea obtiene el stock. Tiene el mismo nombre que este método pero reciben distintos parámetros.
+        String arrayAuxiliar[][] = new String[videojuegos.length][videojuegos[0].length]; // Aquí se crea una copia vacía del catálogo completo.
         
-        String[][] stockCopia = Arrays.copyOf(stock, stock.length);
-
-        Arrays.sort(stockCopia, (a, b) -> a[columna - 1].compareTo(b[columna - 1]));
-
-        return stockCopia;
+        // Este for pone el stock ordenado de menor a mayor en la columna que toca. Una
+        //  vez hecho esto, comprueba que la ID asociada a cada stock coincida con un
+        //  valor en el catálogo. Una vez encuentre la coincidencia, guarda el ID y
+        //  el nombre del videojuego en las posiciones correctas y sale del bucle.
+        for (int y = 0; y < arrayAuxiliar.length; y++) {
+            
+            arrayAuxiliar[y][columna - 1] = stockOrdenado[y][1];
+            
+            for (int x = 0; x < arrayAuxiliar.length; x++) {
+                
+                if (Integer.parseInt(stockOrdenado[y][0]) == Integer.parseInt(videojuegos[x][0])) {
+                    arrayAuxiliar[y][0] = videojuegos[x][0];
+                    arrayAuxiliar[y][1] = videojuegos[x][1];
+                    break;
+                }
+            }
+        }
+        
+        return arrayAuxiliar;
     }
+    
+    // Este método comprueba si el valor a ordenar es entero o decimal y si se desea ordenar de
+    //  menor a mayor o de mayor a menor.
+    public static String[][] catalogoOrdenadoStock(String [][] videojuegos, int columna, String tipo) {
+        
+        String arrayAuxiliar[][] = videojuegos;
+        boolean entero = esEntero(videojuegos, columna);
+        
+        if (entero) {
+            if (tipo.equals("mayor")) {
+                return ordenarMayorEntero(arrayAuxiliar, columna);
+            } else {
+                return ordenarMenorEntero(arrayAuxiliar, columna);
+            }
+        } else {
+            if (tipo.equals("mayor")) {
+                return ordenarMayorFloat(arrayAuxiliar, columna);
+            } else {
+                return ordenarMenorFloat(arrayAuxiliar, columna);
+            }
+        }
+    }
+    
+    // Este método comprueba si la columna pasada como parámetro es
+    //  entera o no
+    public static boolean esEntero(String[][] array, int columna) {
+
+        // Este método recorre todas las posiciones, en caso de que
+        //  encuentre un `.`, significa que hay valores decimales,
+        //  así que se tratará como float.
+        for (int x = 0; x < array.length; x++) {
+
+            if (array[x][columna - 1].contains(".")) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    // Este método ordena el array bidimensional basándose en una columna de 
+    //  menor a mayor y conteniendo valores enteros.
+    public static String[][] ordenarMenorEntero(String[][] array, int columna) {
+
+        for (int x = 0; x < array.length; x++) {
+            for (int y = x + 1; y < array.length; y++) {
+                if (Integer.parseInt(array[y][columna - 1]) < Integer.parseInt(array[x][columna - 1])) {
+                    String auxiliar[] = array[x];
+                    array[x] = array[y];
+                    array[y] = auxiliar;
+                }
+            }
+        }
+        
+        return array;
+    }
+    
+    // Este método ordena el array bidimensional basándose en una columna de 
+    //  mayor a menor y conteniendo valores enteros.
+    public static String[][] ordenarMayorEntero(String[][] array, int columna) {
+        
+        for (int x = 0; x < array.length; x++) {
+            for (int y = x + 1; y > array.length; y++) {
+                if (Integer.parseInt(array[y][columna - 1]) < Integer.parseInt(array[x][columna - 1])) {
+                    String auxiliar[] = array[x];
+                    array[x] = array[y];
+                    array[y] = auxiliar;
+                }
+            }
+        }
+        
+        return array;
+    }
+
+    // Este método ordena el array bidimensional basándose en una columna de 
+    //  menor a mayor y conteniendo valores decimales.
+    public static String[][] ordenarMenorFloat(String[][] array, int columna) {
+
+        for (int x = 0; x < array.length; x++) {
+            for (int y = x + 1; y < array.length; y++) {
+                if (Float.parseFloat(array[y][columna - 1]) < Float.parseFloat(array[x][columna - 1])) {
+                    String auxiliar[] = array[x];
+                    array[x] = array[y];
+                    array[y] = auxiliar;
+                }
+            }
+        }
+        
+        return array;
+    }
+    
+    // Este método ordena el array bidimensional basándose en una columna de 
+    //  mayor a menor y conteniendo valores decimales.
+    public static String[][] ordenarMayorFloat(String[][] array, int columna) {
+        
+        for (int x = 0; x < array.length; x++) {
+            for (int y = x + 1; y < array.length; y++) {
+                if (Float.parseFloat(array[y][columna - 1]) > Float.parseFloat(array[x][columna - 1])) {
+                    String auxiliar[] = array[x];
+                    array[x] = array[y];
+                    array[y] = auxiliar;
+                }
+            }
+        }
+        
+        return array;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    
 }
