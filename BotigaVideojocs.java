@@ -144,6 +144,8 @@ public class BotigaVideojocs {
             
             int enteroUsuario = obtenerEnteroUsuario("Introduce opción: ", min, max);
             
+            String ventas[][] = new String[0][0];
+            
             switch (enteroUsuario) {
                 case OPCION_CONSULTAR_CATALOGO -> mostrarCatalogoVideojuegos(1, juegos, 2, juegos, 3, juegos, "Código", "Nombre", "Precio");
                 case OPCION_STOCK -> mostrarCatalogoVideojuegos(1, juegos, 2, juegos, 2, stockVideojocs, "Código", "Nombre", "Stock");
@@ -158,6 +160,7 @@ public class BotigaVideojocs {
                 case OPCION_REGISTRAR_VENTA -> {
                 }
                 case OPCION_REGISTRAR_DEVOLUCION -> {
+                    devolucion(ventas);
                 }
                 case OPCION_SALIR -> salir = true;
             }
@@ -371,5 +374,12 @@ public class BotigaVideojocs {
     ////////////////////////////////////////////////////////////////////////////////////
     
     
-    
+    public static void devolucion(String[][] ventas) {
+        
+        if (ventas.length != 0) {
+            
+        } else {
+            System.out.println("\nTienes que realizar alguna compra antes.\n");
+        }
+    }
 }
