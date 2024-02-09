@@ -163,7 +163,7 @@ public class BotigaVideojocs {
                     ventas = venta(juegos, stockVideojocs, ventas);
                 }
                 case OPCION_REGISTRAR_DEVOLUCION -> {
-                    ventas = devolucion(ventas, juegos);
+                    ventas = devolucion(ventas, juegos, stockVideojocs);
                 }
                 case OPCION_SALIR -> salir = true;
             }
@@ -278,9 +278,8 @@ public class BotigaVideojocs {
     public static String[][] catalogoOrdenadoStock(String [][] videojuegos, int columna, String tipo) {
         
         String arrayAuxiliar[][] = videojuegos;
-        boolean entero = esEntero(videojuegos, columna);
         
-        if (entero) {
+        if (esEntero(videojuegos, columna)) {
             if (tipo.equals("mayor")) {
                 return ordenarMayorEntero(arrayAuxiliar, columna);
             } else {
@@ -331,17 +330,17 @@ public class BotigaVideojocs {
     // Este método ordena el array bidimensional basándose en una columna de 
     //  mayor a menor y conteniendo valores enteros.
     public static String[][] ordenarMayorEntero(String[][] array, int columna) {
-        
+
         for (int x = 0; x < array.length; x++) {
-            for (int y = x + 1; y > array.length; y++) {
-                if (Integer.parseInt(array[y][columna - 1]) < Integer.parseInt(array[x][columna - 1])) {
+            for (int y = x + 1; y < array.length; y++) {
+                if (Integer.parseInt(array[y][columna - 1]) > Integer.parseInt(array[x][columna - 1])) {
                     String auxiliar[] = array[x];
                     array[x] = array[y];
                     array[y] = auxiliar;
                 }
             }
         }
-        
+
         return array;
     }
 
@@ -630,7 +629,7 @@ public class BotigaVideojocs {
     ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// .Métodos devoluciones. //////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
-    public static int[][] devolucion(int[][] ventas, String[][] catalogo) {
+    public static int[][] devolucion(int[][] ventas, String[][] catalogo, String[][] stock) {
         
         if (ventas.length != 0) {
             
@@ -645,10 +644,9 @@ public class BotigaVideojocs {
                     int codigoVenta = obtenerEnteroUsuario("Introduzca el código de venta: ");
 
                     if (existeCodigo(ventas, codigoVenta)) {
-                        
                         System.out.println("Procesando devolución......\n");
                         calculoDinero(catalogo, castVentasString, codigoVenta);
-                        
+                        stock = recuperarStock(ventas, stock, codigoVenta);
                         ventas = eliminarFilaConCodigo(ventas, codigoVenta);
                         confirmación = sigue("¿Desea intentar otra devolución? (S/N): ");
                     } else {
@@ -728,6 +726,28 @@ public class BotigaVideojocs {
         }
         
         return false;
+    }
+    
+    
+    public static String[][] recuperarStock(int[][] ventas, String[][] stock, int codigo) {
+        
+        for (int y = 0; y < ventas.length; y++) {
+            
+            if (codigo == ventas[y][0]) {
+                
+                int idVideojuego = ventas[y][1];
+                
+                for (int x = 0; x < stock.length; x++) {
+                    
+                    if (idVideojuego == Integer.parseInt(stock[x][0])) {
+                        
+                        stock[x][1] = String.valueOf(Integer.parseInt(stock[x][1]) + ventas[y][2]);
+                    }
+                }
+            }
+        }
+        
+        return stock;
     }
     ////////////////////////////////////////////////////////////////////////////////////
 }
