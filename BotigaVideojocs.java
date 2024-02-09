@@ -1,10 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package acts_entregables;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -44,7 +39,9 @@ public class BotigaVideojocs {
     }
     
     
+    ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// .Pedir entero usuario. //////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
     // Este método recibe 3 parámetros. El primero es el mensaje que se quiere
     //  mostrar por pantalla. El segundo el número mínimo deseado. El tercero
     //  el número máximo deseado. En resumen, el rango.
@@ -78,7 +75,9 @@ public class BotigaVideojocs {
     ////////////////////////////////////////////////////////////////////////////////////
     
     
+    //////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// .Funciones que utilizan los métodos. //////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////
     // Este método genera un número aleatorio entre el número máximo y mínimo que se le pase como
     //  parámetro.
     public static int generarRandom(int min, int max) {
@@ -87,7 +86,9 @@ public class BotigaVideojocs {
     //////////////////////////////////////////////////////////////////////////////////////////////////
     
     
+    ////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// .Método stock videojuegos. //////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////
     // Este método genera un array bidimensional, en la primera columna guarda el ID y en
     //  la segunda columna almacena el stock de dicho videojuego generado aleatoriamente
     //  entre el rango 0-20.
@@ -109,7 +110,9 @@ public class BotigaVideojocs {
     ////////////////////////////////////////////////////////////////////////////////////////
     
     
+    ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// .Métodos menú. //////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     // Este método es el general que muestra cada opción del menú y a su vez
     //  dentro de este se llaman a los demás métodos.
     public static void mostrarMenu(int min, int max) {
@@ -127,7 +130,8 @@ public class BotigaVideojocs {
             {"10", "Grand Theft Auto V", "49.99"}
         }; // Tabla con todos los videojuegos y sus precios
 
-        String stockVideojocs[][] = stockVideojocs(juegos, MIN_STOCK, MAX_STOCK);
+        String stockVideojocs[][] = stockVideojocs(juegos, MIN_STOCK, MAX_STOCK); // Stock de cada videojuego entre el rango establecido.
+        int ventas[][] = new int[0][3];
         
         boolean salir = false;
         
@@ -144,8 +148,6 @@ public class BotigaVideojocs {
             
             int enteroUsuario = obtenerEnteroUsuario("Introduce opción: ", min, max);
             
-            String ventas[][] = new String[0][0];
-            
             switch (enteroUsuario) {
                 case OPCION_CONSULTAR_CATALOGO -> mostrarCatalogoVideojuegos(1, juegos, 2, juegos, 3, juegos, "Código", "Nombre", "Precio");
                 case OPCION_STOCK -> mostrarCatalogoVideojuegos(1, juegos, 2, juegos, 2, stockVideojocs, "Código", "Nombre", "Stock");
@@ -158,9 +160,10 @@ public class BotigaVideojocs {
                     mostrarCatalogoVideojuegos(1, ordenadoPorPrecio, 2, ordenadoPorPrecio, 3, ordenadoPorPrecio, "Código", "Nombre", "Precio");
                 }
                 case OPCION_REGISTRAR_VENTA -> {
+                    ventas = venta(juegos, stockVideojocs, ventas);
                 }
                 case OPCION_REGISTRAR_DEVOLUCION -> {
-                    devolucion(ventas);
+                    ventas = devolucion(ventas, juegos);
                 }
                 case OPCION_SALIR -> salir = true;
             }
@@ -171,7 +174,9 @@ public class BotigaVideojocs {
     ////////////////////////////////////////////////////////////////////////////
     
     
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// .Método para imprimir cada tabla. //////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     // Este imprime cada columna y cabecera especificadas por los parámetros que recibe.
     public static void mostrarCatalogoVideojuegos(int columnaUno, String[][] arrayBidimensionalUno, 
                                                   int columnaDos, String[][] arrayBidimensionalDos, 
@@ -235,7 +240,9 @@ public class BotigaVideojocs {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    ////////////////////////////// .Métodos para ordenar. //////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////// .Métodos para ordenar. ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Este método junto con el de abajo tienen el nombre igual pero realizan distintas
     //  opciones. Este recibe como parámetro el catálogo completo de videojuegis,
     //  el stock de cada videojuego, la columna a ordenar (será la de stock) y
@@ -371,15 +378,356 @@ public class BotigaVideojocs {
         
         return array;
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    //////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////// .Métodos ventas. //////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
+    // En este método se recoge todo lo que tiene que ver con las ventas de los
+    //  videojuegos que hay en el catálogo.
+    public static int[][] venta(String[][] catalogo, String[][] stock, int[][] ventas) {
+
+        // Estas 2 líneas sirven para mostrar los juegos y el stock disponible para cada videojuego
+        //  en caso de que el usuario no recuerde el stock o cualquier problema.
+        String ordenadoPorStock[][] = catalogoOrdenadoStock(catalogo, stock, 3, ORDENAR_STOCK);
+        mostrarCatalogoVideojuegos(1, ordenadoPorStock, 2, ordenadoPorStock, 3, ordenadoPorStock, "Código", "Nombre", "Stock");
+        
+        int ticketVentas[][] = ventas; // Inicializa el ticketVentas como el ticket existente para poder añadir cosas en él.
+        int contadorCodigo = codigoVenta(ventas); // Aqui se comprueba el siguiente código de venta que debe tener toda la compra.
+        char confirmación = 'S';
+        
+        // Esta línea guarda el tamaño original del arary, para que en caso de que el usuario introduzca
+        //  más stock del que hay y se vaya sin comprar nada no le muestre el ticket.
+        int tamanyoOriginal = ticketVentas.length;
+        
+        contadorCodigo++; // Esto sirve para que el número obtenido en `contadorCodigo` tenga +1 para toda la compra.
+        do {
+            //Pregunta al usuario sobre el código del videojuego y la cantidad de unidades que desea.
+            int codigoVideojuego = obtenerEnteroUsuario("Introduzca el código del videojuego que desea comprar: ", 1, catalogo.length);
+            int unidadesVideojuego = obtenerEnteroUsuario("Introduzca la cantidad de unidades que desea comprar: ", MIN_STOCK, MAX_STOCK);
+            
+            if (unidadesVideojuego == 0) {
+                
+                System.out.println("No puedes comprar 0 unidades de un videojuego.");
+                confirmación = sigue("¿Desea comprar algún videojuego más? (S/N): ");
+                
+            } else if (hayStock(stock, codigoVideojuego, unidadesVideojuego)) {
+                
+                // Si hay stock y cumple con los requisitos, entra aquí.
+                ticketVentas = añadirFila(ticketVentas); // Esto añade una línea al ticket auxiliar creado en este método a raíz del ticket original.
+                // Estas 3 líneas añaden la información requerida para el ticket a la posición del tamaño
+                //  máximo (alargado +1 anteriormente) -1 para ir directamente al final del ticket.
+                ticketVentas[ticketVentas.length - 1][0] = contadorCodigo;
+                ticketVentas[ticketVentas.length - 1][1] = codigoVideojuego;
+                ticketVentas[ticketVentas.length - 1][2] = unidadesVideojuego;
+                
+                // Esta línea llama al método para eliminar las unidades compradas de stock.
+                stock = eliminarStock(stock, codigoVideojuego, unidadesVideojuego);
+                
+                // Le pregunta al usuario si quiere seguir comprando.
+                confirmación = sigue("¿Desea comprar algún videojuego más? (S/N): ");
+                
+            } else {
+                System.out.println("Lo siento, no tenemos este videojuego disponible.");
+                confirmación = sigue("¿Desea comprar algún videojuego más? (S/N): ");
+            }
+        } while (confirmación == 'S');
+        
+        // Comprobante de que el usuario ha comprado algo o no para mostrar el ticket o no.
+        if (tamanyoOriginal == ticketVentas.length) {
+            System.out.println("No has comprado nada, hasta la próxima.\n");
+        } else {
+            // Esta línea llama al método que mostrará el resumen de la venta.
+            mostrarResumeDeVenta(ticketVentas, catalogo, contadorCodigo);
+        }
+        
+        return ticketVentas;
+    }
+    
+    // Este método recorre el array bidimensional entero de todas las ventas y devuelve
+    //  el último código de venta. 
+    public static int codigoVenta(int[][] ventas) {
+        
+        int codMax = 0;
+        
+        for (int y = 0; y < ventas.length; y++) {
+            if (ventas[y][0] > codMax) {
+                codMax = ventas[y][0];
+            }
+        }
+        
+        return codMax;
+    }
+    
+    // Este método comprueba si hay stock disponible para el videojuego seleccionado.
+    public static boolean hayStock(String[][] stockVideojuego, int codigoVideojuego, int unidadesVideojuego) {
+        
+        for (int y = 0; y < stockVideojuego.length; y++) {
+            
+            if (Integer.parseInt(stockVideojuego[y][0]) == codigoVideojuego) {
+                return Integer.parseInt(stockVideojuego[y][1]) >= unidadesVideojuego;
+            }
+        }
+        return false;
+    }
+    
+    // Este método obtiene la respuesta del usuario para seguir comprando o no.
+    public static char sigue(String mensaje) {
+        
+        System.out.print(mensaje);
+        do {
+            if (teclado.hasNext()) {
+                String datos = teclado.next();
+                System.out.println("");
+                return datos.charAt(0);
+            }
+            teclado.next();
+        } while (true);
+    }
+    
+    // Este método añade una fila extra al "ticket" (el total de ventas).
+    public static int[][] añadirFila(int[][] ticket) {
+        
+            int auxiluar[][] = new int[ticket.length + 1][3];
+
+            for (int y = 0; y < ticket.length; y++) {
+                for (int x = 0; x < ticket[y].length; x++) {
+                    auxiluar[y][x] = ticket[y][x];
+                }
+            }
+
+        return auxiluar;
+    }
+    
+    // Este método elimina el stock según cuántas unidades se compren del videojuego.
+    public static String[][] eliminarStock(String[][] stock, int codigoVideojuego, int cantidad) {
+
+        for (int y = 0; y < stock.length; y++) {
+            if (Integer.parseInt(stock[y][0]) == codigoVideojuego) {
+                int stockActual = Integer.parseInt(stock[y][1]);
+                stockActual -= cantidad;
+                stock[y][1] = String.valueOf(stockActual);
+            }
+        }
+
+        return stock;
+    }
+    
+    // Este método muestra el resumen de la venta.
+    public static void mostrarResumeDeVenta(int[][] ticket, String[][] catalogo, int codigoVenta) {
+        
+        int contador = 0;
+        
+        System.out.printf("Resumen de la venta (código %d)", codigoVenta);
+        
+        // Esto de aquí comprueba cuántas fias corresponden al código de venta de la compra del usuario.
+        for (int y = 0; y < ticket.length; y++) {
+            if (ticket[y][0] == codigoVenta) {
+                contador++;
+            }
+        }
+        
+        String miniTicket[][] = new String[contador][3]; // Crea un "mini ticket" que tiene como tamaño la cantidad total de compras de un mismo cóigo de venta. 
+        int indice = 0;
+        
+        // Este bucle rellena el "mini ticket" con la información adecuada.
+        for (int y = 0; y < ticket.length; y++) {
+            
+            if (ticket[y][0] == codigoVenta) {
+                
+                miniTicket[indice][0] = String.valueOf(ticket[y][1]);
+                miniTicket[indice][1] = nombreVideojuego(catalogo, miniTicket[indice][0]); // Aquí se llama al método para obtener el nombre correspondiente al ID vendido.
+                miniTicket[indice][2] = String.valueOf(ticket[y][2]);
+                indice++;
+            }
+        }
+        
+        // Aquí se muestra el mini ticket en con el mismo formato que el catálogo.
+        mostrarCatalogoVideojuegos(1, miniTicket, 2, miniTicket, 3, miniTicket, "Código", "Nombre", "Unidades");
+        
+        calculoDinero(catalogo, miniTicket);
+        
+        System.out.println("");
+        
+    }
+    
+    // Este método obtiene el nombre del videojuego de la venta correspondiente.
+    public static String nombreVideojuego(String[][] catalogo, String codigo) {
+        
+        for (int y = 0; y < catalogo.length; y++) {
+            
+            if (Integer.parseInt(catalogo[y][0]) == Integer.parseInt(codigo)) {
+                return catalogo[y][1];
+            }
+        }
+        return null;
+    }
+    
+    // Este método calcula el dinero total que el usuario tendrá que pagar.
+    public static void calculoDinero(String[][] catalogo, String[][] miniTicket) {
+        
+        double total = 0;
+        
+        for (int y = 0; y < miniTicket.length; y++) {
+            
+            int codigo = Integer.parseInt(miniTicket[y][0]);
+            total = total + (Integer.parseInt(miniTicket[y][2]) * Double.parseDouble(catalogo[precioVideojuego(catalogo, codigo)][2]));
+        }
+        
+        System.out.printf("Total a pagar: %.2f €\n", total);
+    }
+    
+    // Este método calcula el dinero total que el usuario tendrá que pagar con un código de venta específico.
+    public static void calculoDinero(String[][] catalogo, String[][] miniTicket, int codigoVenta) {
+        
+        double total = 0;
+        
+        for (int y = 0; y < miniTicket.length; y++) {
+            
+            if (codigoVenta == Integer.parseInt(miniTicket[y][0])) {
+                
+                total = total + (Integer.parseInt(miniTicket[y][2]) * Double.parseDouble(catalogo[precioVideojuego(catalogo, miniTicket[y][1])][2]));
+            }
+        }
+        
+        System.out.printf("Su devolución ha sido realizada. Se devuelve un importe de %.2f €\n", total);
+    }
+    
+    // Este método deuvelve el índice donde se ubica el precio del juego con codigo deseado.
+    public static int precioVideojuego(String[][] catalogo, int codigo) {
+        
+        int indice = 0;
+        
+        for (int y = 0; y < catalogo.length; y++) {
+            
+            if (Integer.parseInt(catalogo[y][0]) == codigo) {
+                return indice;
+            }
+            
+            indice++;
+        }
+        return -1;
+    }
+    
+    // Este método deuvelve el índice donde se ubica el precio del juego con nombre deseado.
+    public static int precioVideojuego(String[][] catalogo, String nombre) {
+        
+        int indice = 0;
+        
+        for (int y = 0; y < catalogo.length; y++) {
+            
+            if (nombre.equals(catalogo[y][1])) {
+                return indice;
+            }
+            
+            indice++;
+        }
+        return -1;
+    }
+    //////////////////////////////////////////////////////////////////////////////
+    
+    
     ////////////////////////////////////////////////////////////////////////////////////
-    
-    
-    public static void devolucion(String[][] ventas) {
+    ////////////////////////////// .Métodos devoluciones. //////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    public static int[][] devolucion(int[][] ventas, String[][] catalogo) {
         
         if (ventas.length != 0) {
             
+            char confirmación = 'S';
+            
+            do {
+                
+                if (ventas.length != 0) {
+                    String castVentasString[][] = castVentasString(ventas, catalogo);
+                    mostrarCatalogoVideojuegos(1, castVentasString, 2, castVentasString, 3, castVentasString, "Código venta", "Nombre", "Unidades");
+                    
+                    int codigoVenta = obtenerEnteroUsuario("Introduzca el código de venta: ");
+
+                    if (existeCodigo(ventas, codigoVenta)) {
+                        
+                        System.out.println("Procesando devolución......\n");
+                        calculoDinero(catalogo, castVentasString, codigoVenta);
+                        
+                        ventas = eliminarFilaConCodigo(ventas, codigoVenta);
+                        confirmación = sigue("¿Desea intentar otra devolución? (S/N): ");
+                    } else {
+                        System.out.println("No podemos localizar esta venta.");
+                        confirmación = sigue("¿Desea intentar otra devolución? (S/N): ");
+                    }
+                } else {
+                    System.out.println("No tienes más productos para devolver.\n");
+                    confirmación = 'N';
+                }
+            } while (confirmación == 'S');
+            
         } else {
-            System.out.println("\nTienes que realizar alguna compra antes.\n");
+            System.out.println("\nTienes que realizar alguna compra antes de poder devolverla.\n");
         }
+        
+        return ventas;
     }
+    
+    // Este método hace un casting a String del ticket para que pueda ser impresa con el método de imprimir
+    //  tablas. También, cambia la columna central del ID al nombre del videojuego para que sea más fácil
+    //  poder identificar a qué se refiere cada cosa.
+    public static String[][] castVentasString(int[][] ventas, String[][] catalogo) {
+        
+        String castVentasString[][] = new String[ventas.length][ventas[0].length];
+        for (int y = 0; y < castVentasString.length; y++) {
+            for (int x = 0; x < castVentasString[y].length; x++) {
+                if (x == 1) {
+                    castVentasString[y][x] = nombreVideojuego(catalogo, String.valueOf(ventas[y][1]));
+                } else {
+                    castVentasString[y][x] = Integer.toString(ventas[y][x]);
+                }
+            }
+        }
+        
+        return castVentasString;
+    }
+    
+    // Este método elimina todas las filas con las que el código coincida. Para eliminarlas creo una
+    //  matriz igual pero sin las filas del código. Luego copio una matriz a otra (no se copian los
+    //  valores del código que se desea eliminar).
+    public static int[][] eliminarFilaConCodigo(int[][] ventas, int codigo) {
+        
+        int contadorVecesCodigoDistinto = 0;
+        
+        for (int y = 0; y < ventas.length; y++) {
+            if (ventas[y][0] != codigo) {
+                contadorVecesCodigoDistinto++;
+            }
+        }
+        
+        int aux[][] = new int[contadorVecesCodigoDistinto][3];
+        int indice = 0;
+        
+        for (int y = 0; y < ventas.length; y++) {
+            
+            if (ventas[y][0] != codigo) {
+                
+                for (int x = 0; x < ventas[y].length; x++) {
+                    
+                    aux[indice][x] = ventas[y][x];
+                }
+                indice++;
+            }
+        }
+        
+        return aux;
+    }
+    
+    // Este método comprueba si existe el codigo de venta a la hora de devolver un producto.
+    public static boolean existeCodigo(int[][] ventas, int codigo) {
+        
+        for (int y = 0; y < ventas.length; y++) {
+            if (ventas[y][0] == codigo) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////
 }
