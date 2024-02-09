@@ -728,7 +728,7 @@ public class BotigaVideojocs {
         return false;
     }
     
-    
+    // Este método devuelve el stock a los productos que han sido devueltos.
     public static String[][] recuperarStock(int[][] ventas, String[][] stock, int codigo) {
         
         for (int y = 0; y < ventas.length; y++) {
